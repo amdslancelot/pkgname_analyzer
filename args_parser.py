@@ -19,8 +19,8 @@ def get_parser():
     #                    help='path to build.log'),
     #parser.add_argument('--feature', action='store_true')
     #parser.add_argument('--no-feature', dest='feature', action='store_false')
-    parser.add_argument('action', choices=['name', 'version'],
-                        help='***required*** detect LICENSE or COMMITMENT file')
+    parser.add_argument('action', choices=['name', 'version', 'longver'],
+                        help='***required*** types to process the package name')
     #parser.add_argument('--package', '-p', nargs='?',
     #                    help='looking for specific package')
     parser.add_argument('--package', '-p',
