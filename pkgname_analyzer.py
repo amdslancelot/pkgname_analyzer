@@ -67,6 +67,8 @@ def analyze_pkgname(p, t):
         version = "-".join(l_version)
         pos_el = re.search(r"el", version)
         return version[:pos_el.start()-1]
+    elif t == "longver":
+        return "-".join(l_version)
     else:
         warn("[ERROR] Unknown action type: " + str(t))
 
