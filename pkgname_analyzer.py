@@ -23,17 +23,34 @@ def warn(s):
 #===================================================
 
 import re
-re_version = r"^[0-9]+([\.][0-9])*"
+re_version = r"^[0-9]+([\.][0-9a-zA-Z]+)*"
+re_start_of_non_version = r"[\.][a-zA-Z]"
 
 def trim_rpm_name(name):
     r = name
-    l = [".rpm", ".x86_64", ".aarch64", "arm64"]
+    l = [".rpm", ".x86_64", ".aarch64", ".arm64", ".noarch"]
     for e in l:
         r = r.replace(e, "")
     return r
 
+def strip_after_dist(name):
+    r = name
+    index_last_occur_dash = r.rfind("-")
+    index_first_non_digit = -1
+    if index_last_occur_dash != -1:
+        # Starting from the right most dash, find first occur of non-digit
+        r_re_start_of_non_version = re.search(re_start_of_non_version, r[index_last_occur_dash+1:])
+        if r_re_start_of_non_version:
+            # (pos at last occur dash) + 1 + (pos at start of non-version rpm name in substring after dash)
+            real_pos_start_of_non_version = index_last_occur_dash + 1 + r_re_start_of_non_version.start()
+            return r[:real_pos_start_of_non_version]
+    return r
+
 def analyze_pkgname(p, t):
-    rpmname = trim_rpm_name(p)
+    if p == "repodata":
+        return
+
+    rpmname = strip_after_dist(p)
     l_pkgname = []
     l_version = []
 
@@ -46,29 +63,13 @@ def analyze_pkgname(p, t):
         else:
             l_pkgname.append(e)
     
-
-
-    #pos_first_digit = re.search(r"\d", rpmname).start()-1
-    #pkgname = rpmname[:pos_first_digit]
-    #pkgname_rest = rpmname[(pos_first_digit+1):]
-    #debug(pkgname_rest)
-    
     if t == "name":
         return "-".join(l_pkgname)
     elif t == "version":
-        #re_search_end_digit = re.search(r"[a-zA-Z]", pkgname_rest)
-
-        #if pos_end_digit:
-        #    version = pkgname_rest[:re_search_end_digit.start()-1]
-        #    return version
-        #else:
-        #    warn("[ERROR] Invalid version format: " + pkgname_rest)
-
-        version = "-".join(l_version)
-        pos_el = re.search(r"el", version)
-        return version[:pos_el.start()-1]
-    elif t == "longver":
         return "-".join(l_version)
+    elif t == "longver":
+        ver_rest = p.replace("-".join(l_pkgname)+"-", "")
+        return trim_rpm_name(ver_rest)
     else:
         warn("[ERROR] Unknown action type: " + str(t))
 
