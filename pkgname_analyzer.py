@@ -28,12 +28,15 @@ re_start_of_non_version = r"[\.][a-zA-Z]"
 
 def trim_rpm_name(name):
     r = name
-    l = [".rpm", ".x86_64", ".aarch64", ".arm64", ".noarch"]
+    l = [".rpm", ".x86_64", ".aarch64", ".arm64", ".noarch", ".ppc64le", ".i686", ".s390x"]
     for e in l:
         r = r.replace(e, "")
     return r
 
 def strip_after_dist(name):
+    """
+    Strip after distro (el8, el9 ...) 
+    """
     r = name
     index_last_occur_dash = r.rfind("-")
     index_first_non_digit = -1
